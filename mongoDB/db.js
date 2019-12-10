@@ -1,4 +1,5 @@
 var mongoose = require("mongoose");
+
 mongoose.connect(
   "mongodb://localhost:27017/banyan",
   { useNewUrlParser: true, useUnifiedTopology: true },
@@ -7,9 +8,35 @@ mongoose.connect(
     console.log("mongodb success");
   }
 );
+// 商品信息
+const commoditySchema = mongoose.Schema(
+  {
+    name: String,
+    model: String,
+    brand: String,
+    unit: {
+      type: String,
+      default: "只"
+    },
+    number: {
+      type: Number,
+      default: 1
+    },
+    price: Number,
+    totalPrice: Number,
+    retail: Number,
+    remarks: String,
+    p_id: String,
+    s_id: Array
+  },
+  {
+    timestamps: true
+  }
+);
+const commodity = mongoose.model("commodity", commoditySchema);
 
-// 创建商品字段属性
-var commoditySchema = mongoose.Schema(
+// 采购商品
+const purchaseSchema = mongoose.Schema(
   {
     name: String,
     model: String,
@@ -18,15 +45,16 @@ var commoditySchema = mongoose.Schema(
     number: Number,
     price: Number,
     totalPrice: Number,
-    retail: Number,
-    source: String,
-    remarks: String
+    from: String,
+    remarks: String,
+    from: String
   },
   {
     timestamps: true
   }
 );
-var commodity = mongoose.model("commodity", commoditySchema);
+const purchase = mongoose.model("purchase", purchaseSchema);
+
 // 出售商品
 const sellSchema = mongoose.Schema(
   {
@@ -38,7 +66,8 @@ const sellSchema = mongoose.Schema(
     price: Number,
     totalPrice: Number,
     retail: Number,
-    source: String,
+    totalRetail: Number,
+    to: Array,
     remarks: String
   },
   {
@@ -46,7 +75,5 @@ const sellSchema = mongoose.Schema(
   }
 );
 const sell = mongoose.model("sell", sellSchema);
-module.exports = {
-  commodity,
-  sell
-};
+
+module.exports = { purchase, commodity, sell };

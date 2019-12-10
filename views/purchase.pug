@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1 purchase 采购
+  form(action="/purchase/purchaseCommodity", method="post")
+    input(type="text", name="name",placeholder='name')  
+    input(type="text", name="model",placeholder='model')
+    input(type="text",name='brand',placeholder='brand')
+    input(type="text",name='unit',placeholder='unit')
+    input(type="number",name='number',placeholder='number')
+    input(type="number",name='price',placeholder='price')
+    input(type="number",name='totalPrice',placeholder='totalPrice')
+    input(type="text",name='from',placeholder='from')
+    input(type="text",name='to',placeholder='to')
+    input(type="submit", value="go")

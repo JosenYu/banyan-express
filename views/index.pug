@@ -20,12 +20,12 @@ block content
     input(type="number", name="price")
     label totalPrice
     input(type="number", name="totalPrice")
-    label retail
-    input(type="number", name="retail")
-    label source
-    input(type="text", name="source")
     label remarks
     input(type="text", name="remarks")
+    label(for="") from
+    input(type="text", name="from")
+    label(for="") p_id
+    input(type="text", name="p_id" placeholder='p_id')
     p
       input(type="submit", value="go")
   p 
@@ -37,7 +37,7 @@ block content
     input(type="number", value=1 name="pageCurrent", placeholder='pageCurrent')
     input(type="number", value=10 name="pageSize",placeholder='pageSize')
     input(type="submit", value="go")
-  h1 更新数据
+  h1 商品售出
   form(action="/updateCommodity", method="post")
     input(type="text", name="_id", placeholder="_id")
     label name
@@ -50,14 +50,20 @@ block content
     input(type="number", name="number")
     label unit
     input(type="text", name="unit")
+    label price
+    input(type="number", name="price")
     label totalPrice
     input(type="number", name="totalPrice")
     label retail
     input(type="number", name="retail")
-    label source
-    input(type="text", name="source")
+    label totalRetail
+    input(type="number", name="totalRetail")
     label remarks
     input(type="text", name="remarks")
+    label(for="") to
+    input(type="text",name='to')
+    label(for="") s_id
+    input(type="text", name="s_id")
     p
       button(type="submit") submit
 
