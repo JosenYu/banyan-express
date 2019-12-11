@@ -14,17 +14,12 @@ const commoditySchema = mongoose.Schema(
     name: String,
     model: String,
     brand: String,
-    unit: {
-      type: String,
-      default: "只"
-    },
-    number: {
-      type: Number,
-      default: 1
-    },
-    price: Number,
-    totalPrice: Number,
-    retail: Number,
+    unit: { type: String, default: "只" },
+    number: { type: Number, default: 1 },
+    price: { type: Number, default: 1 },
+    totalPrice: { type: Number, default: 1 },
+    MSRP: { type: Number, default: 1 },
+    TMSRP: { type: Number, default: 1 },
     remarks: String,
     p_id: String,
     s_id: Array
@@ -41,12 +36,12 @@ const purchaseSchema = mongoose.Schema(
     name: String,
     model: String,
     brand: String,
-    unit: String,
-    number: Number,
-    price: Number,
-    totalPrice: Number,
-    from: String,
-    remarks: String,
+    unit: { type: String, default: "只" },
+    number: { type: Number, default: 1 },
+    price: { type: Number, default: 1 },
+    totalPrice: { type: Number, default: 1 },
+    MSRP: { type: Number, default: 1 },
+    TMSRP: { type: Number, default: 1 },
     from: String
   },
   {
@@ -61,14 +56,14 @@ const sellSchema = mongoose.Schema(
     name: String,
     model: String,
     brand: String,
-    unit: String,
-    number: Number,
-    price: Number,
-    totalPrice: Number,
-    retail: Number,
-    totalRetail: Number,
-    to: Array,
-    remarks: String
+    unit: { type: String, default: "只" },
+    number: { type: Number, default: 1 },
+    MSRP: { type: Number, default: 1 },
+    TMSRP: { type: Number, default: 1 },
+    retail: { type: Number, default: 1 },
+    totalRetail: { type: Number, default: 1 },
+    remarks: String,
+    to: String
   },
   {
     timestamps: true

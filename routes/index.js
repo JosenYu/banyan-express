@@ -20,13 +20,14 @@ router.post("/createCommodity", (req, res, next) => {
           throw err;
         } else {
           console.log("采购完成", doc);
-          resolve(doc);
+          resolve(doc._id);
         }
       });
     });
   // 商品入库
-  const commodity = body =>
+  const commodity = (body, P_ID) =>
     new Promise(resolve => {
+      body.p_id = P_ID;
       db.commodity.create(body, (err, doc) => {
         if (err) {
           res.send(msg.fail(err));
@@ -38,9 +39,9 @@ router.post("/createCommodity", (req, res, next) => {
       });
     });
   (async () => {
-    const purchaseDoc = await purchase(req.body);
-    const commodityDoc = await commodity(req.body);
-    return { purchaseDoc, commodityDoc };
+    const P_ID = await purchase(req.body);
+    const commodityDoc = await commodity(req.body, P_ID);
+    return { P_ID, commodityDoc };
   })().then(v => {
     res.send(msg.success(v));
     console.log(v);
@@ -112,33 +113,42 @@ router.get("/getCommodity", (req, res, next) => {
 
 // 商品出库
 router.post("/updateCommodity", (req, res) => {
-  const commodity = () =>
+  const sell = body =>
     new Promise(resolve => {
-      db.commodity.updateOne({ _id: req.body._id }, req.body, (err, doc) => {
-        if (err) {
-          res.send(msg.fail(err));
-        } else {
-          console.log("update：", doc);
-          resolve(doc);
-        }
-      });
-    });
-  const sell = () =>
-    new Promise(resolve => {
-      db.sell.create(req.body, (err, doc) => {
+      db.sell.create(body, (err, doc) => {
         if (err) {
           res.send(msg.fail(err));
           throw err;
         } else {
           console.log("采购完成", doc);
-          resolve(doc);
+          resolve(doc._id);
         }
       });
     });
+
+  const commodity = (body, S_ID) =>
+    new Promise(resolve => {
+      db.commodity.updateOne(
+        { _id: body.ID },
+        {
+          number: body.number,
+          $push: { s_id: S_ID }
+        },
+        (err, doc) => {
+          if (err) {
+            res.send(msg.fail(err));
+          } else {
+            console.log("commodity update finish", doc);
+            resolve(doc);
+          }
+        }
+      );
+    });
+
   (async () => {
-    const commodityDoc = await commodity(req.body);
-    const sellDoc = await sell(req.body);
-    return { sellDoc, commodityDoc };
+    const S_ID = await sell(req.body);
+    const commodityDoc = await commodity(req.body, S_ID);
+    return { S_ID, commodityDoc };
   })().then(v => {
     console.log(v);
     res.send(v);

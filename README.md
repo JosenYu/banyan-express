@@ -1,4 +1,60 @@
-# 理解 async/await
+# Banyan-express
+
+## 接口文档
+
+### 创建商品库存（create）
+
+1. 接口地址: `/createCommodity`
+2. 请求方式: post
+3. 参数
+   |NAME|NEED|DEFAULT|INTRODUCE|
+   |---|---|---|---|
+   |name|yes|null|名称|
+   |model|yes|null|模型|
+   |brand|yes|null|品牌|
+   |number|yes|1|数量|
+   |unit|yes|只|单位|
+   |price|yes|1|进价|
+   |totalPrice|yes|1|总进价|
+   |MSRP|yes|1|建议售价|
+   |TMSRP|yes|1|建议总售价|
+   |remarks|yes|1|备注信息|
+   |from|yes|1|来源|
+
+### 获取商品列表（find）
+
+1. 接口地址: `/getCommodity`
+2. 请求方式: get
+3. 参数
+   |NAME|NEED|DEFAULT|INTRODUCE|
+   |---|---|---|---|
+   |name|no|''|名称|
+   |model|no|''|模型|
+   |brand|no|''|品牌|
+   |pageSize|no|10|展示多少条|
+   |pageCurrent|no|1|当前页|
+
+### 商品出库（update）
+
+1. 接口地址: `/updateCommodity`
+2. 请求方式: post
+3. 参数
+   |NAME|NEED|DEFAULT|INTRODUCE|
+   |---|---|---|---|
+   |ID|yes|null|Commodity.\_id |
+   |name|yes|null|名称|
+   |model|yes|null|模型|
+   |brand|yes|null|品牌|
+   |number|yes|null|数量|
+   |unit|yes|只|单位|
+   |MSRP|yes|1|建议售价|
+   |TMSRP|yes|1|建议总售价|
+   |retail|yes|1|售价|
+   |totalRetail|yes|1|总售价|
+   |remarks|yes|1|备注信息|
+   |to|yes|1|出处|
+
+## 理解 async/await
 
 [原文](https://juejin.im/post/596e142d5188254b532ce2da)
 
