@@ -2,7 +2,6 @@
 var express = require("express");
 var router = express.Router();
 const db = require("../mongoDB/db");
-var msg = require("../utils/message");
 
 router.get("/", function(req, res, next) {
   res.render("purchase");
@@ -13,10 +12,10 @@ router.post("/purchaseCommodity", (req, res) => {
   db.purchase.create(req.body, (err, doc) => {
     if (err) {
       console.error(err);
-      res.send(msg.fail([], err));
+      res.status(500);
       throw err;
     } else {
-      res.send(msg.success(doc));
+      res.status(200).json(doc);
     }
   });
 });

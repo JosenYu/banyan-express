@@ -19,7 +19,6 @@ const commoditySchema = mongoose.Schema(
     price: { type: Number, default: 1 },
     totalPrice: { type: Number, default: 1 },
     MSRP: { type: Number, default: 1 },
-    TMSRP: { type: Number, default: 1 },
     remarks: String,
     p_id: String,
     s_id: Array
@@ -41,7 +40,6 @@ const purchaseSchema = mongoose.Schema(
     price: { type: Number, default: 1 },
     totalPrice: { type: Number, default: 1 },
     MSRP: { type: Number, default: 1 },
-    TMSRP: { type: Number, default: 1 },
     from: String
   },
   {
@@ -59,7 +57,6 @@ const sellSchema = mongoose.Schema(
     unit: { type: String, default: "只" },
     number: { type: Number, default: 1 },
     MSRP: { type: Number, default: 1 },
-    TMSRP: { type: Number, default: 1 },
     retail: { type: Number, default: 1 },
     totalRetail: { type: Number, default: 1 },
     remarks: String,
