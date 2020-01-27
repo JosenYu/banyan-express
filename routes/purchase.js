@@ -6,6 +6,7 @@ var msg = require("../utils/message");
 
 router.get("/", function(req, res, next) {
   res.render("purchase");
+  debugger;
 });
 
 // 采购商品

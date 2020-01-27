@@ -2,12 +2,68 @@ var express = require("express");
 var router = express.Router();
 var db = require("../mongoDB/db");
 var msg = require("../utils/message");
+var formidable = require("formidable");
+var fs = require("fs");
+var arr = [];
+router.get("/b", (req, res) => {
+  const read = fs.createReadStream(__dirname + "/../videos/123.mp4");
+  read.pipe(res);
+});
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
   res.render("index", { title: "commodity" });
 });
+router.post("/aaa", (req, res) => {
+  var form = new formidable.IncomingForm();
+  form.uploadDir = __dirname + "/../videos/";
+  form.parse(req, function(err, fields, files) {
+    console.log("fields", fields);
+    // console.log("files", files);
+    arr.push({
+      files,
+      fields
+    });
+    /**
+     * 排序根据 cur判断
+     * @param 0 开始
+     */
+    arr.sort((a, b) => a.fields.cur - b.fields.cur);
+    console.log(arr);
 
+    res.send(msg.success("ok"));
+  });
+});
+router.put("/aaa2", (req, res) => {
+  // 需要合并的数组
+  const checkList = arr.filter(v => v.fields.name === req.body.name);
+  arr = arr.filter(v => v.fields.name !== req.body.name);
+  const [item] = checkList;
+  // 文件名称
+  const NAME = item.fields.name;
+  // 切片数量
+  const SLICE_NUM = item.fields.total;
+  // 写入流
+  let targetStream = fs.createWriteStream(__dirname + "/../videos/" + NAME);
+  /**
+   * 循环追加写入
+   */
+  checkList.forEach(value => {
+    // 当前操作 文件路径
+    const CUR_PATH = value.files.files.path;
+    // 来源流
+    let originStream = fs.createReadStream(CUR_PATH);
+    // *pipe流
+    originStream.pipe(targetStream, { end: false });
+    // 写入结束 删除文件
+    originStream.on("end", function() {
+      // 删除文件
+      fs.unlinkSync(CUR_PATH);
+      console.log("文件已删除", CUR_PATH);
+    });
+  });
+  res.json(msg.success());
+});
 // 创建商品存储入库流程
 router.post("/createCommodity", (req, res, next) => {
   console.info("商品入库info", req.body);

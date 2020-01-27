@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  h1 SIGN IN
+  form(action="/users/signIn", method="get")
+    input(type="text", name="account" placeholder='account')
+    input(type="text", name="password" placeholder='password')
+    input(type="submit", value="in")
+  h1 SIGN UP
+  form(action="/users/signUp", method="post")
+    input(type="text", name="name" placeholder='name')
+    input(type="text", name="account" placeholder='account')
+    input(type="text", name="password" placeholder='password')
+    input(type="submit", value="up")
+    
+  

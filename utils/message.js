@@ -3,7 +3,7 @@ class Message {
   // 成功返回类型
   success(list) {
     return {
-      state: 200,
+      success: true,
       msg: "no",
       list: list
     };
@@ -11,7 +11,7 @@ class Message {
   // 失败返回类型
   fail(msg) {
     return {
-      state: 500,
+      success: false,
       msg: msg,
       list: []
     };
