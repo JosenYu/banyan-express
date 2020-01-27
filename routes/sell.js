@@ -2,7 +2,6 @@
 var express = require("express");
 var router = express.Router();
 var db = require("../mongoDB/db");
-var msg = require("../utils/message");
 router.get("/", function(req, res, next) {
   res.render("sell");
 });
@@ -10,9 +9,10 @@ router.get("/", function(req, res, next) {
 router.post("/sellCommodity", (req, res) => {
   db.sell.create(req.body, (err, doc) => {
     if (err) {
-      res.send(msg.fail([], err));
+      res.status(500).json(err);
+      throw err;
     } else {
-      res.send(msg.success(doc));
+      res.status(200).json(doc);
     }
   });
 });

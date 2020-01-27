@@ -72,7 +72,7 @@ router.post("/createCommodity", (req, res, next) => {
     new Promise(resolve => {
       db.purchase.create(body, (err, doc) => {
         if (err) {
-          res.send(msg.fail(err));
+          res.status(500);
           throw err;
         } else {
           console.log("采购完成", doc);
@@ -86,7 +86,7 @@ router.post("/createCommodity", (req, res, next) => {
       body.p_id = P_ID;
       db.commodity.create(body, (err, doc) => {
         if (err) {
-          res.send(msg.fail(err));
+          res.status(500);
           throw err;
         } else {
           console.log("商品入库信息", doc);
@@ -99,7 +99,7 @@ router.post("/createCommodity", (req, res, next) => {
     const commodityDoc = await commodity(req.body, P_ID);
     return { P_ID, commodityDoc };
   })().then(v => {
-    res.send(msg.success(v));
+    res.json(v);
     console.log(v);
   });
 });
@@ -117,16 +117,17 @@ router.get("/getCommodity", (req, res, next) => {
     new Promise(resolve => {
       db.commodity.find(
         {
-          // 模糊查询
+          // 模糊查询，数量大于0
           name: { $regex: name },
           model: { $regex: model },
-          brand: { $regex: brand }
+          brand: { $regex: brand },
+          number: { $gt: 0 }
         },
         null,
         { limit: pageSize, skip: pageCurrent * pageSize },
         (err, doc) => {
           if (err) {
-            res.send(msg.fail(err));
+            res.status(500);
             throw err;
           } else {
             console.log("商品查询完成", doc);
@@ -143,11 +144,12 @@ router.get("/getCommodity", (req, res, next) => {
           // 模糊查询
           name: { $regex: name },
           model: { $regex: model },
-          brand: { $regex: brand }
+          brand: { $regex: brand },
+          number: { $gt: 0 }
         },
         (err, count) => {
           if (err) {
-            res.send(msg.fail(err));
+            res.status(500);
             throw err;
           } else {
             console.log("商品总数", count);
@@ -163,7 +165,7 @@ router.get("/getCommodity", (req, res, next) => {
     return { documents, totalCounts };
   })().then(result => {
     console.log("find.content：", result);
-    res.send(msg.success(result));
+    res.status(200).json(result);
   });
 });
 
@@ -173,7 +175,7 @@ router.post("/updateCommodity", (req, res) => {
     new Promise(resolve => {
       db.sell.create(body, (err, doc) => {
         if (err) {
-          res.send(msg.fail(err));
+          res.sendStatus(500);
           throw err;
         } else {
           console.log("采购完成", doc);
@@ -192,7 +194,8 @@ router.post("/updateCommodity", (req, res) => {
         },
         (err, doc) => {
           if (err) {
-            res.send(msg.fail(err));
+            res.stateus(500);
+            throw err;
           } else {
             console.log("commodity update finish", doc);
             resolve(doc);
@@ -207,7 +210,7 @@ router.post("/updateCommodity", (req, res) => {
     return { S_ID, commodityDoc };
   })().then(v => {
     console.log(v);
-    res.send(v);
+    res.status(200).json(v);
   });
 });
 
