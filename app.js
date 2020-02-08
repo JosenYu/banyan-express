@@ -8,6 +8,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var purchaseRouter = require("./routes/purchase");
 var sellRouter = require("./routes/sell");
+var uploadRouter = require("./routes/upload");
 
 var app = express();
 // *跨域
@@ -38,6 +39,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/purchase", purchaseRouter);
 app.use("/sell", sellRouter);
+app.use("/upload", uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

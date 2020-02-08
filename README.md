@@ -1,59 +1,5 @@
 # Banyan-express
 
-## 接口文档
-
-### 创建商品库存（create）
-
-1. 接口地址: `/createCommodity`
-2. 请求方式: post
-3. 参数
-   |NAME|NEED|DEFAULT|INTRODUCE|
-   |---|---|---|---|
-   |name|yes|null|名称|
-   |model|yes|null|模型|
-   |brand|yes|null|品牌|
-   |number|yes|1|数量|
-   |unit|yes|只|单位|
-   |price|yes|1|进价|
-   |totalPrice|yes|1|总进价|
-   |MSRP|yes|1|建议售价|
-   |TMSRP|yes|1|建议总售价|
-   |remarks|yes|1|备注信息|
-   |from|yes|1|来源|
-
-### 获取商品列表（find）
-
-1. 接口地址: `/getCommodity`
-2. 请求方式: get
-3. 参数
-   |NAME|NEED|DEFAULT|INTRODUCE|
-   |---|---|---|---|
-   |name|no|''|名称|
-   |model|no|''|模型|
-   |brand|no|''|品牌|
-   |pageSize|no|10|展示多少条|
-   |pageCurrent|no|1|当前页|
-
-### 商品出库（update）
-
-1. 接口地址: `/updateCommodity`
-2. 请求方式: post
-3. 参数
-   |NAME|NEED|DEFAULT|INTRODUCE|
-   |---|---|---|---|
-   |ID|yes|null|Commodity.\_id |
-   |name|yes|null|名称|
-   |model|yes|null|模型|
-   |brand|yes|null|品牌|
-   |number|yes|null|数量|
-   |unit|yes|只|单位|
-   |MSRP|yes|1|建议售价|
-   |TMSRP|yes|1|建议总售价|
-   |retail|yes|1|售价|
-   |totalRetail|yes|1|总售价|
-   |remarks|yes|1|备注信息|
-   |to|yes|1|出处|
-
 ## 理解 async/await
 
 [原文](https://juejin.im/post/596e142d5188254b532ce2da)
@@ -101,6 +47,8 @@ async function f() {
 f().then(v => console.log(v)); // 等待6s后才输出 'done'
 ```
 
+---
+
 ## mongoose
 
 判断大小
@@ -110,6 +58,8 @@ f().then(v => console.log(v)); // 等待6s后才输出 'done'
 - \$gte:大于或等于
 - \$lte:小于或等于
 
+---
+
 ## linux 解压
 
 - tar -xvf file.tar //解压 tar 包
@@ -118,6 +68,8 @@ f().then(v => console.log(v)); // 等待6s后才输出 'done'
 - tar -xZvf file.tar.Z //解压 tar.Z
 - unrar e file.rar //解压 rar
 - unzip file.zip //解压 zip
+
+---
 
 ## 本地文件上传服务器
 
@@ -145,6 +97,8 @@ f().then(v => console.log(v)); // 等待6s后才输出 'done'
 
    例如：scp -r test  root@192.168.0.101:/var/www/   把当前目录下的 test 目录上传到服务器的/var/www/ 目录
 
+---
+
 ## Nginx 停止服务和各种命令
 
 1. 从容停止: kill -QUIT 主进程号
@@ -157,3 +111,143 @@ f().then(v => console.log(v)); // 等待6s后才输出 'done'
 
    - 方法一：进入 nginx 可执行目录 sbin 下，输入命令./nginx -s reload  即可
    - 方法二：查找当前 nginx 进程号，然后输入命令：kill -HUP 进程号 实现重启 nginx 服务
+
+---
+
+## 大文件上传
+
+### web
+
+由于自己测试用不考虑美观问题直接用 html 元素，**没有在乎样式问题进度条，以及切片完成后的提示，可以提交切片，等等样式页面问题都没有去做完善：）**
+
+```html
+<div>
+  <input id="file2" type="file" , name="file2" onchange="change()" />
+  <button id="upLoad" type="submit" onclick="upload()">upload</button>
+</div>
+```
+
+js 部分 我用提交数据使用 `fetch` 方法具体使用 请移步 [mdn](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch)，
+
+具体思路如下
+
+1. 获取文件将其切片
+2. 将切片文件上传之后台
+3. 告知文件上传完成
+
+```js
+// 改变 input file
+async function change() {
+  const [file] = document.getElementById("file2").files;
+  if (!file) return;
+  // console.log(file);
+  let cur = 0;
+  const SIZE = 1 * 1024 * 1024;
+  let fileChunkList = [];
+  const TOTAL = Math.ceil(file.size / SIZE);
+  while (cur < file.size) {
+    fileChunkList.push({ file: file.slice(cur, cur + SIZE) });
+    cur += SIZE;
+  }
+  // console.log(fileChunkList);
+  fileChunkList.forEach((value, index) => {
+    let fd = new FormData();
+    fd.append("files", value.file);
+    fd.append("cur", index);
+    fd.append("name", file.name);
+    fd.append("total", TOTAL);
+    fetch("upload/aaa", {
+      method: "post",
+      body: fd
+    })
+      .then(response => console.log(response))
+      .catch(error => console.error("Error:", error));
+  });
+  alert("切片完成，并提交后台。。");
+}
+// 切片完成，提交按钮
+function upload() {
+  var data = { name: "123.mp4" };
+  fetch("upload/aaa2", {
+    method: "post",
+    body: JSON.stringify(data), // data can be `string` or {object}!
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+    .then(response => console.log(response))
+    .catch(error => console.error("Error:", error));
+}
+```
+
+### nodeJS（Express）
+
+具体思路如下
+
+1. 接收 web 传来等切片文件 ,使用 [formidable](https://www.jianshu.com/p/fa358da69c18) 插件接收 formdata 数据
+2. 将获取的 formdata 放入 arr 对象，根据 cur 进行排序，避免合并的时候合并顺序混乱
+3. 将文件合并用 [pipe](http://nodejs.cn/api/stream.html#stream_event_pipe)
+
+```js
+// 获取提交文件
+router.post("/aaa", (req, res) => {
+  var form = new formidable.IncomingForm();
+  form.uploadDir = __dirname + "/../videos/";
+  form.keepExtensions = true;
+  form.parse(req, function(err, fields, files) {
+    if (err) return;
+    // console.log("fields", fields);
+    // console.log("files", files);
+
+    arr.push({
+      name: fields.name,
+      cur: fields.cur,
+      total: fields.total,
+      path: files.files.path
+    });
+
+    /**
+     * 排序根据 cur判断M
+     * @param 0 开始
+     */
+    arr.sort((a, b) => a.cur - b.cur);
+    // console.log(arr);
+    res.send(msg.success("ok"));
+  });
+});
+// 获取合并信息
+router.post("/aaa2", (req, res) => {
+  // 需要合并的数组
+  const checkList = arr.filter(v => v.name === req.body.name);
+  arr = arr.filter(v => v.name !== req.body.name);
+  const [item] = checkList;
+  // 文件名称
+  const NAME = item.name;
+  // 写入流
+  const writeStream = fs.createWriteStream(__dirname + "/../videos/" + NAME);
+  merage(checkList, writeStream);
+  res.json(msg.success());
+});
+
+// *合并文件
+async function merage(checkList, writeStream) {
+   // *一定要同步合并 不能异步
+  for (const iterator of checkList) {
+    // 写入
+    await pipeStream(iterator, writeStream);
+  }
+}
+// 写入流
+const pipeStream = (iterator, writeStream) =>
+  new Promise(resolve => {
+    const readStream = fs.createReadStream(iterator.path);
+    readStream.pipe(writeStream, { end: false });
+    // 读取结束 删除文件
+    readStream.on("end", () => {
+      // 删除文件
+      fs.unlinkSync(iterator.path);
+      console.log("文件已删除", iterator.path);
+      resolve();
+    });
+  });
+```

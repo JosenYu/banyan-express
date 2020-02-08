@@ -66,14 +66,5 @@ block content
     input(type="text",name='to')
     p
       button(type="submit") submit
-  h5 提交文件1
-  form(action="/aaa", method="post" enctype="multipart/form-data")
-    input(type="file", name="file")
-    input(type="submit", value="go")
-  div
-    h5 提交文件2
-    input#file2(type="file", name="file2" onchange='change()')
-    button#upLoad(type="submit" onclick="up()") ok
-  script(src="/js/index.js")
   script.
     

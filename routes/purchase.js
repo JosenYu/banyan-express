@@ -5,7 +5,6 @@ const db = require("../mongoDB/db");
 
 router.get("/", function(req, res, next) {
   res.render("purchase");
-  debugger;
 });
 
 // 采购商品

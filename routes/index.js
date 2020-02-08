@@ -5,65 +5,73 @@ var msg = require("../utils/message");
 var formidable = require("formidable");
 var fs = require("fs");
 var arr = [];
-router.get("/b", (req, res) => {
-  const read = fs.createReadStream(__dirname + "/../videos/123.mp4");
-  read.pipe(res);
-});
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
   res.render("index", { title: "commodity" });
 });
+
 router.post("/aaa", (req, res) => {
   var form = new formidable.IncomingForm();
   form.uploadDir = __dirname + "/../videos/";
+  form.keepExtensions = true;
   form.parse(req, function(err, fields, files) {
-    console.log("fields", fields);
+    if (err) return;
+    // console.log("fields", fields);
     // console.log("files", files);
+
     arr.push({
-      files,
-      fields
+      name: fields.name,
+      cur: fields.cur,
+      total: fields.total,
+      path: files.files.path
     });
+
     /**
-     * 排序根据 cur判断
+     * 排序根据 cur判断M
      * @param 0 开始
      */
-    arr.sort((a, b) => a.fields.cur - b.fields.cur);
-    console.log(arr);
-
+    arr.sort((a, b) => a.cur - b.cur);
+    // console.log(arr);
     res.send(msg.success("ok"));
   });
 });
-router.put("/aaa2", (req, res) => {
+router.post("/aaa2", (req, res) => {
   // 需要合并的数组
-  const checkList = arr.filter(v => v.fields.name === req.body.name);
-  arr = arr.filter(v => v.fields.name !== req.body.name);
+  const checkList = arr.filter(v => v.name === req.body.name);
+  arr = arr.filter(v => v.name !== req.body.name);
   const [item] = checkList;
   // 文件名称
-  const NAME = item.fields.name;
-  // 切片数量
-  const SLICE_NUM = item.fields.total;
+  const NAME = item.name;
   // 写入流
-  let targetStream = fs.createWriteStream(__dirname + "/../videos/" + NAME);
-  /**
-   * 循环追加写入
-   */
-  checkList.forEach(value => {
-    // 当前操作 文件路径
-    const CUR_PATH = value.files.files.path;
-    // 来源流
-    let originStream = fs.createReadStream(CUR_PATH);
-    // *pipe流
-    originStream.pipe(targetStream, { end: false });
-    // 写入结束 删除文件
-    originStream.on("end", function() {
+  const writeStream = fs.createWriteStream(__dirname + "/../videos/" + NAME);
+  // 合并文件
+  mergeFileChunk(writeStream, checkList);
+  res.json(msg.success());
+});
+
+const mergeFileChunk = async (writeStream, checkList) => {
+  await Promise.all(
+    checkList.map((v, index) => {
+      pipeStream(writeStream, v.path);
+    })
+  );
+};
+
+const pipeStream = (writeStream, CUR_PATH) =>
+  new Promise(resolve => {
+    const readStream = fs.createReadStream(CUR_PATH);
+    // 写入
+    readStream.pipe(writeStream, { end: false });
+    // 读取结束 删除文件
+    readStream.on("end", () => {
       // 删除文件
       fs.unlinkSync(CUR_PATH);
       console.log("文件已删除", CUR_PATH);
+      resolve();
     });
   });
-  res.json(msg.success());
-});
+
 // 创建商品存储入库流程
 router.post("/createCommodity", (req, res, next) => {
   console.info("商品入库info", req.body);
