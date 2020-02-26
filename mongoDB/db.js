@@ -1,44 +1,58 @@
-// var mongoose = require("mongoose");
-// var storage = require("./storage");
-// var users = require("./users");
-// // 数据库 链接
-// mongoose.connect(
-//   "mongodb://localhost:27017/banyan",
-//   { useNewUrlParser: true, useUnifiedTopology: true },
-//   err => {
-//     if (err) throw err;
-//     console.log("mongodb success");
-//   }
-// );
-// // 商品信息
-// const commodity = mongoose.model(
-//   "commodity",
-//   mongoose.Schema(storage.commodity, {
-//     timestamps: true
-//   })
-// );
+var mongoose = require("mongoose");
+const STOCK = require("./stock");
+const CUSTOMER = require("./customer");
+// 数据库 链接
+mongoose.connect(
+  "mongodb://localhost:27017/banyan",
+  { useNewUrlParser: true, useUnifiedTopology: true },
+  err => {
+    if (err) throw err;
+    console.log("mongodb success");
+  }
+);
 
-// // 采购商品
-// const purchase = mongoose.model(
-//   "purchase",
-//   mongoose.Schema(storage.purchase, {
-//     timestamps: true
-//   })
-// );
+// 商品
+const stock_model = mongoose.model(
+  "stock_model",
+  mongoose.Schema(STOCK.model, {
+    timestamps: true
+  })
+);
 
-// // 出售商品
-// const sell = mongoose.model(
-//   "sell",
-//   mongoose.Schema(storage.sell, {
-//     timestamps: true
-//   })
-// );
-// // 用户信息
-// const user = mongoose.model(
-//   "user",
-//   mongoose.Schema(users.user, {
-//     timestamps: true
-//   })
-// );
+// 库存表
+const stock = mongoose.model(
+  "stock",
+  mongoose.Schema(STOCK.stock, {
+    timestamps: true
+  })
+);
 
-// module.exports = { purchase, commodity, sell, user };
+// 出货
+const stock_sell = mongoose.model(
+  "stock_sell",
+  mongoose.Schema(STOCK.sell, {
+    timestamps: true
+  })
+);
+
+// 进口
+const customer_importer = mongoose.model(
+  "customer_importer",
+  mongoose.Schema(CUSTOMER.importer, {
+    timestamps: true
+  })
+);
+// 出口
+const customer_exporter = mongoose.model(
+  "customer_exporter",
+  mongoose.Schema(CUSTOMER.exporter, {
+    timestamps: true
+  })
+);
+module.exports = {
+  stock,
+  stock_sell,
+  stock_model,
+  customer_importer,
+  customer_exporter
+};

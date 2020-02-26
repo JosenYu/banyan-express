@@ -1,76 +1,11 @@
 var express = require("express");
 var router = express.Router();
 var db = require("../mongoDB/db");
-var msg = require("../utils/message");
-var formidable = require("formidable");
-var fs = require("fs");
-var arr = [];
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
   res.render("index", { title: "commodity" });
 });
-
-router.post("/aaa", (req, res) => {
-  var form = new formidable.IncomingForm();
-  form.uploadDir = __dirname + "/../videos/";
-  form.keepExtensions = true;
-  form.parse(req, function(err, fields, files) {
-    if (err) return;
-    // console.log("fields", fields);
-    // console.log("files", files);
-
-    arr.push({
-      name: fields.name,
-      cur: fields.cur,
-      total: fields.total,
-      path: files.files.path
-    });
-
-    /**
-     * 排序根据 cur判断M
-     * @param 0 开始
-     */
-    arr.sort((a, b) => a.cur - b.cur);
-    // console.log(arr);
-    res.send(msg.success("ok"));
-  });
-});
-router.post("/aaa2", (req, res) => {
-  // 需要合并的数组
-  const checkList = arr.filter(v => v.name === req.body.name);
-  arr = arr.filter(v => v.name !== req.body.name);
-  const [item] = checkList;
-  // 文件名称
-  const NAME = item.name;
-  // 写入流
-  const writeStream = fs.createWriteStream(__dirname + "/../videos/" + NAME);
-  // 合并文件
-  mergeFileChunk(writeStream, checkList);
-  res.json(msg.success());
-});
-
-const mergeFileChunk = async (writeStream, checkList) => {
-  await Promise.all(
-    checkList.map((v, index) => {
-      pipeStream(writeStream, v.path);
-    })
-  );
-};
-
-const pipeStream = (writeStream, CUR_PATH) =>
-  new Promise(resolve => {
-    const readStream = fs.createReadStream(CUR_PATH);
-    // 写入
-    readStream.pipe(writeStream, { end: false });
-    // 读取结束 删除文件
-    readStream.on("end", () => {
-      // 删除文件
-      fs.unlinkSync(CUR_PATH);
-      console.log("文件已删除", CUR_PATH);
-      resolve();
-    });
-  });
 
 // 创建商品存储入库流程
 router.post("/createCommodity", (req, res, next) => {
@@ -112,7 +47,7 @@ router.post("/createCommodity", (req, res, next) => {
   });
 });
 
-// 获取商品列表
+// 获取查询条件的所有商品列表
 router.get("/getCommodity", (req, res, next) => {
   const name = req.query.name || "";
   const model = req.query.model || "";
@@ -125,11 +60,10 @@ router.get("/getCommodity", (req, res, next) => {
     new Promise(resolve => {
       db.commodity.find(
         {
-          // 模糊查询，数量大于0
           name: { $regex: name },
           model: { $regex: model },
-          brand: { $regex: brand },
-          number: { $gt: 0 }
+          brand: { $regex: brand }
+          // number: { $gt: 0 }
         },
         null,
         { limit: pageSize, skip: pageCurrent * pageSize },
@@ -152,8 +86,7 @@ router.get("/getCommodity", (req, res, next) => {
           // 模糊查询
           name: { $regex: name },
           model: { $regex: model },
-          brand: { $regex: brand },
-          number: { $gt: 0 }
+          brand: { $regex: brand }
         },
         (err, count) => {
           if (err) {
@@ -176,7 +109,66 @@ router.get("/getCommodity", (req, res, next) => {
     res.status(200).json(result);
   });
 });
-
+// 获取可以出库的商品列表(剩余数量>0)
+router.get("/getCommodity/surplus", (req, res, next) => {
+  const name = req.query.name || "";
+  const model = req.query.model || "";
+  const brand = req.query.brand || "";
+  const pageSize = Number(req.query.pageSize || 10);
+  const pageCurrent = Number(req.query.pageCurrent - 1 || 0);
+  // 模糊查询，数量大于0
+  const document = (name, model, brand, pageSize, pageCurrent) =>
+    new Promise((resolve, reject) => {
+      db.commodity.find(
+        {
+          name: { $regex: name },
+          model: { $regex: model },
+          brand: { $regex: brand },
+          number: { $gt: 0 }
+        },
+        null,
+        { limit: pageSize, skip: pageCurrent * pageSize },
+        (err, doc) => {
+          if (err) {
+            reject(err);
+            throw err;
+          } else {
+            console.log("商品查询完成", doc);
+            resolve(doc);
+          }
+        }
+      );
+    });
+  const count = (name, model, brand) =>
+    new Promise((resolve, reject) => {
+      db.commodity.count(
+        {
+          // 模糊查询
+          name: { $regex: name },
+          model: { $regex: model },
+          brand: { $regex: brand },
+          number: { $gt: 0 }
+        },
+        (err, count) => {
+          if (err) {
+            reject(count);
+            throw err;
+          } else {
+            console.log("商品总数", count);
+            resolve(count);
+          }
+        }
+      );
+    });
+  (async () => {
+    doc = await document(name, model, brand, pageSize, pageCurrent);
+    totalCounts = await count(name, model, brand, pageSize, pageCurrent);
+    return { doc, totalCounts };
+  })().then(result => {
+    console.log("find.content：", result);
+    res.status(200).json(result);
+  });
+});
 // 商品出库
 router.post("/updateCommodity", (req, res) => {
   const sell = body =>

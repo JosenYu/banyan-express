@@ -58,6 +58,8 @@ f().then(v => console.log(v)); // 等待6s后才输出 'done'
 - \$gte:大于或等于
 - \$lte:小于或等于
 
+模糊查询 `{ $regex: NAME }`
+
 ---
 
 ## linux 解压
@@ -231,7 +233,7 @@ router.post("/aaa2", (req, res) => {
 
 // *合并文件
 async function merage(checkList, writeStream) {
-   // *一定要同步合并 不能异步
+  // *一定要同步合并 不能异步
   for (const iterator of checkList) {
     // 写入
     await pipeStream(iterator, writeStream);

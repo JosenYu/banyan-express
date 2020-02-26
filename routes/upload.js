@@ -1,6 +1,5 @@
 var express = require("express");
 var router = express.Router();
-var msg = require("../utils/message");
 var formidable = require("formidable");
 var fs = require("fs");
 var arr = [];
@@ -46,7 +45,7 @@ router.post("/aaa2", (req, res) => {
   // 写入流
   const writeStream = fs.createWriteStream(__dirname + "/../videos/" + NAME);
   merage(checkList, writeStream);
-  res.json(msg.success());
+  res.json();
 });
 
 // *合并文件
