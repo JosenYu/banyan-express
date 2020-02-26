@@ -139,11 +139,11 @@ router.post("/purchase", (req, res) => {
 
 // 出售
 router.post("/sell", (req, res) => {
-  createSell(req).then(result => {
+  createSell(req.body).then(result => {
     res.json(result);
   });
 });
-async function createSell({ body }) {
+async function createSell(body) {
   const createSellData = await createSellDB(body);
   const updateStockData = await updateStockDB(body);
   return { createSellData, updateStockData };
