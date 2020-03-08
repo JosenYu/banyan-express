@@ -1,6 +1,6 @@
 var mongoose = require("mongoose");
 const STOCK = require("./stock");
-const CUSTOMER = require("./customer");
+const CUSTOM = require("./custom");
 // 数据库 链接
 mongoose.connect(
   "mongodb://localhost:27017/banyan",
@@ -36,16 +36,16 @@ const stock_sell = mongoose.model(
 );
 
 // 进口
-const customer_importer = mongoose.model(
+const custom_importer = mongoose.model(
   "customer_importer",
-  mongoose.Schema(CUSTOMER.importer, {
+  mongoose.Schema(CUSTOM.importer, {
     timestamps: true
   })
 );
 // 出口
-const customer_exporter = mongoose.model(
+const custom_exporter = mongoose.model(
   "customer_exporter",
-  mongoose.Schema(CUSTOMER.exporter, {
+  mongoose.Schema(CUSTOM.exporter, {
     timestamps: true
   })
 );
@@ -53,6 +53,6 @@ module.exports = {
   stock,
   stock_sell,
   stock_model,
-  customer_importer,
-  customer_exporter
+  custom_importer,
+  custom_exporter
 };

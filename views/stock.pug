@@ -15,9 +15,9 @@ block content
     input(type="text", name="model" placeholder='model')
     input(type="text", name="brand" placeholder='brand')
     input(type="submit", value="go")
-  h2 searchStock
-  form(action="/stock/searchStock", method="get")
-    input(type="text", name="id" placeholder='id')
+  h2 searchOne
+  form(action="/stock/searchOne", method="get")
+    input(type="text", name="_id" placeholder='_id')
     input(type="submit", value="go")
   h2 purchase
   form(action="/stock/purchase", method="post")
@@ -28,6 +28,7 @@ block content
     input(type="number", name="totalNumber" placeholder='totalNumber')
     input(type="number", name="price" placeholder='price')
     input(type="number", name="totalPrice" placeholder='totalPrice')
+    input(type="text", name="importer_id" placeholder='importer_id')
     input(type="submit", value="go")
   h2 sell
   form(action="/stock/sell", method="post")
@@ -36,5 +37,6 @@ block content
     input(type="number", name="surplusNumber" placeholder='surplusNumber')
     input(type="number", name="retail" placeholder='retail')
     input(type="number", name="totalRetail" placeholder='totalRetail')
+    input(type="text", name="exporter_id" placeholder='exporter_id')
     input(type="submit", value="go")
 

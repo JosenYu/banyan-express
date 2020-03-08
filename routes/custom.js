@@ -4,48 +4,52 @@ var db = require("../mongoDB/db");
 
 /* GET info page. */
 router.get("/", function(req, res, next) {
-  res.render("customer", { title: "customer" });
+  res.render("custom", { title: "custom" });
 });
 
 // 创建进货源
 router.post("/createImporter", (req, res) => {
-  db.customer_importer.create(req.body, (err, doc) => {
+  const importer = {
+    company: req.body.company,
+    linkman: req.body.linkman,
+    tel: req.body.tel,
+    address: req.body.address
+  };
+  db.custom_importer.create(importer, (err, doc) => {
     if (err) throw err;
-    res.json({ data: doc });
+    res.json({ doc });
   });
 });
 // 查询进货联络人
 router.get("/getImporter", (req, res) => {
-  const name = req.query.linkMan;
-  db.customer_importer.find(
+  db.custom_importer.find(
     {
-      linkMan: { $regex: name }
+      linkman: { $regex: req.query.linkman }
     },
     (err, doc) => {
       if (err) throw err;
-      res.json({ data: doc });
+      res.json({ doc });
     }
   );
 });
 
 // 创建出口人
 router.post("/createExporter", (req, res) => {
-  db.customer_exporter.create(req.body, (err, doc) => {
+  db.custom_exporter.create(req.body, (err, doc) => {
     if (err) throw err;
-    res.json({ data: doc });
+    res.json({ doc });
   });
 });
 
 // 查询出货联络人
 router.get("/getExporter", (req, res) => {
-  const linkMan = req.query.linkMan;
-  db.customer_exporter.find(
+  db.custom_exporter.find(
     {
-      linkMan: { $regex: linkMan }
+      linkman: { $regex: req.query.linkman }
     },
     (err, doc) => {
       if (err) throw err;
-      res.json(doc);
+      res.json({ doc });
     }
   );
 });

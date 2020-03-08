@@ -16,7 +16,8 @@ const stock = {
   surplusNumber: { type: Number, default: 1 },
   totalNumber: { type: Number, default: 1 },
   price: { type: Number, default: 1 },
-  totalPrice: { type: Number, default: 1 }
+  totalPrice: { type: Number, default: 1 },
+  importer_id: String
 };
 
 // 出售商品
@@ -24,7 +25,8 @@ const sell = {
   stock_id: String,
   sellNumber: { type: Number, default: 1 },
   retail: { type: Number, default: 1 },
-  totalRetail: { type: Number, default: 1 }
+  totalRetail: { type: Number, default: 1 },
+  exporter_id: String
 };
 
 module.exports = { stock, sell, model };

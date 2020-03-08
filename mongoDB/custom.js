@@ -2,14 +2,14 @@
 // 进口商
 const importer = {
   company: String,
-  linkMan: String,
+  linkman: String,
   tel: Number,
   address: String
 };
 // 出口商
 const exporter = {
   company: String,
-  linkMan: String,
+  linkman: String,
   tel: Number,
   address: String
 };

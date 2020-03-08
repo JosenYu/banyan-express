@@ -3,24 +3,24 @@ extends layout
 block content
   h1=title
   h2 create importer
-  form(action="/customer/createImporter", method="post")
+  form(action="/custom/createImporter", method="post")
     input(type="text", name="company" placeholder='company')
     input(type="text", name="linkMan" placeholder='linkMan')
     input(type='text', name='tel' placeholder='tel')
     input(type='text', name='address' placeholder='address')
     input(type="submit", value="go")
   h2 get importer
-  form(action="/customer/getImporter", method="get")
+  form(action="/custom/getImporter", method="get")
     input(type="text", name="linkMan" placeholder='linkMan')
     input(type="submit", value="go")
   h2 create exporter
-  form(action="/customer/createExporter", method="post")
+  form(action="/custom/createExporter", method="post")
     input(type="text", name="company" placeholder='company')
     input(type="text", name="linkMan" placeholder='linkMan')
     input(type='text', name='tel' placeholder='tel')
     input(type='text', name='address' placeholder='address')
     input(type="submit", value="go")
   h2 get exporter
-  form(action="/customer/getExporter", method="get")
+  form(action="/custom/getExporter", method="get")
     input(type="text", name="linkMan" placeholder='linkMan')
     input(type="submit", value="go")
