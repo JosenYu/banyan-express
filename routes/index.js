@@ -3,7 +3,7 @@ var router = express.Router();
 var db = require("../mongoDB/db");
 
 /* GET home page. */
-router.get("/", function(req, res, next) {
+router.get("/", function (req, res, next) {
   res.render("index", { title: "commodity" });
 });
 
@@ -11,8 +11,8 @@ router.get("/", function(req, res, next) {
 router.post("/createCommodity", (req, res, next) => {
   console.info("商品入库info", req.body);
   // 采购入库
-  const purchase = body =>
-    new Promise(resolve => {
+  const purchase = (body) =>
+    new Promise((resolve) => {
       db.purchase.create(body, (err, doc) => {
         if (err) {
           res.status(500);
@@ -25,7 +25,7 @@ router.post("/createCommodity", (req, res, next) => {
     });
   // 商品入库
   const commodity = (body, P_ID) =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       body.p_id = P_ID;
       db.commodity.create(body, (err, doc) => {
         if (err) {
@@ -41,7 +41,7 @@ router.post("/createCommodity", (req, res, next) => {
     const P_ID = await purchase(req.body);
     const commodityDoc = await commodity(req.body, P_ID);
     return { P_ID, commodityDoc };
-  })().then(v => {
+  })().then((v) => {
     res.json(v);
     console.log(v);
   });
@@ -57,12 +57,12 @@ router.get("/getCommodity", (req, res, next) => {
   console.info("find.query", req.query);
   // 模糊查询商品
   const doc = (name, brand, model, pageSize, pageCurrent) =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       db.commodity.find(
         {
           name: { $regex: name },
           model: { $regex: model },
-          brand: { $regex: brand }
+          brand: { $regex: brand },
           // number: { $gt: 0 }
         },
         null,
@@ -80,13 +80,13 @@ router.get("/getCommodity", (req, res, next) => {
     });
   // 查询总条数
   const count = (name, brand, model) =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       db.commodity.countDocuments(
         {
           // 模糊查询
           name: { $regex: name },
           model: { $regex: model },
-          brand: { $regex: brand }
+          brand: { $regex: brand },
         },
         (err, count) => {
           if (err) {
@@ -104,7 +104,7 @@ router.get("/getCommodity", (req, res, next) => {
     documents = await doc(name, brand, model, pageSize, pageCurrent);
     totalCounts = await count(name, brand, model);
     return { documents, totalCounts };
-  })().then(result => {
+  })().then((result) => {
     console.log("find.content：", result);
     res.status(200).json(result);
   });
@@ -124,7 +124,7 @@ router.get("/getCommodity/surplus", (req, res, next) => {
           name: { $regex: name },
           model: { $regex: model },
           brand: { $regex: brand },
-          number: { $gt: 0 }
+          number: { $gt: 0 },
         },
         null,
         { limit: pageSize, skip: pageCurrent * pageSize },
@@ -147,7 +147,7 @@ router.get("/getCommodity/surplus", (req, res, next) => {
           name: { $regex: name },
           model: { $regex: model },
           brand: { $regex: brand },
-          number: { $gt: 0 }
+          number: { $gt: 0 },
         },
         (err, count) => {
           if (err) {
@@ -164,15 +164,15 @@ router.get("/getCommodity/surplus", (req, res, next) => {
     doc = await document(name, model, brand, pageSize, pageCurrent);
     totalCounts = await count(name, model, brand, pageSize, pageCurrent);
     return { doc, totalCounts };
-  })().then(result => {
+  })().then((result) => {
     console.log("find.content：", result);
     res.status(200).json(result);
   });
 });
 // 商品出库
 router.post("/updateCommodity", (req, res) => {
-  const sell = body =>
-    new Promise(resolve => {
+  const sell = (body) =>
+    new Promise((resolve) => {
       db.sell.create(body, (err, doc) => {
         if (err) {
           res.sendStatus(500);
@@ -185,12 +185,12 @@ router.post("/updateCommodity", (req, res) => {
     });
 
   const commodity = (body, S_ID) =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       db.commodity.updateOne(
         { _id: body.ID },
         {
           number: body.number,
-          $push: { s_id: S_ID }
+          $push: { s_id: S_ID },
         },
         (err, doc) => {
           if (err) {
@@ -208,7 +208,7 @@ router.post("/updateCommodity", (req, res) => {
     const S_ID = await sell(req.body);
     const commodityDoc = await commodity(req.body, S_ID);
     return { S_ID, commodityDoc };
-  })().then(v => {
+  })().then((v) => {
     console.log(v);
     res.status(200).json(v);
   });

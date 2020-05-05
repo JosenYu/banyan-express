@@ -1,11 +1,12 @@
 var mongoose = require("mongoose");
 const STOCK = require("./stock");
-const CUSTOM = require("./custom");
+const CUSTOMER = require("./customer");
 // 数据库 链接
 mongoose.connect(
+  // "mongodb://banyan:89901187@47.96.100.90:27017/banyan",
   "mongodb://localhost:27017/banyan",
   { useNewUrlParser: true, useUnifiedTopology: true },
-  err => {
+  (err) => {
     if (err) throw err;
     console.log("mongodb success");
   }
@@ -15,7 +16,7 @@ mongoose.connect(
 const stock_model = mongoose.model(
   "stock_model",
   mongoose.Schema(STOCK.model, {
-    timestamps: true
+    timestamps: true,
   })
 );
 
@@ -23,7 +24,7 @@ const stock_model = mongoose.model(
 const stock = mongoose.model(
   "stock",
   mongoose.Schema(STOCK.stock, {
-    timestamps: true
+    timestamps: true,
   })
 );
 
@@ -31,22 +32,22 @@ const stock = mongoose.model(
 const stock_sell = mongoose.model(
   "stock_sell",
   mongoose.Schema(STOCK.sell, {
-    timestamps: true
+    timestamps: true,
   })
 );
 
 // 进口
 const custom_importer = mongoose.model(
   "customer_importer",
-  mongoose.Schema(CUSTOM.importer, {
-    timestamps: true
+  mongoose.Schema(CUSTOMER.importer, {
+    timestamps: true,
   })
 );
 // 出口
 const custom_exporter = mongoose.model(
   "customer_exporter",
-  mongoose.Schema(CUSTOM.exporter, {
-    timestamps: true
+  mongoose.Schema(CUSTOMER.exporter, {
+    timestamps: true,
   })
 );
 module.exports = {
@@ -54,5 +55,5 @@ module.exports = {
   stock_sell,
   stock_model,
   custom_importer,
-  custom_exporter
+  custom_exporter,
 };
