@@ -12,7 +12,7 @@ router.get("/", function (req, res, next) {
 
 // 创建进货源
 router.post("/createImporter", (req, res) => {
-  const letter = convertPinyin(req.body.linkMan)
+  const letter = convertPinyin(req.body.linkman)
     .toLocaleUpperCase()
     .split("")[0];
   Object.assign(req.body, { letter: letter });
@@ -35,13 +35,20 @@ router.get("/getImporter", (req, res) => {
 });
 // 创建出口人
 router.post("/createExporter", (req, res) => {
-  const letter = convertPinyin(req.body.linkMan)
+  const letter = convertPinyin(req.body.linkman)
     .toLocaleUpperCase()
     .split("")[0];
   Object.assign(req.body, { letter: letter });
-  db.custom_exporter.create(req.body, (err, doc) => {
+  db.custom_exporter.countDocuments({ tel: req.body.tel }, (err, count) => {
     if (err) throw err;
-    res.json({ doc });
+    if (count >= 1) {
+      res.json({ doc: null });
+    } else {
+      db.custom_exporter.create(req.body, (err, doc) => {
+        if (err) throw err;
+        res.json({ doc });
+      });
+    }
   });
 });
 
@@ -57,11 +64,24 @@ router.get("/getExporter", (req, res) => {
     }
   );
 });
+// 查询出货联络人 - tel
+router.get("/getExporterByTel", (req, res) => {
+  db.custom_exporter.findOne(
+    {
+      tel: req.query.tel,
+    },
+    (err, doc) => {
+      if (err) throw err;
+      res.json({ doc });
+    }
+  );
+});
+
 // 查询所有 进/出口联系人
 router.get("/getAll", (req, res) => {
   const getImporter = () =>
     new Promise((resolve) => {
-      db.custom_exporter.find({}, (err, doc) => {
+      db.custom_importer.find({}, (err, doc) => {
         if (err) throw err;
         resolve(doc);
       });
