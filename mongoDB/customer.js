@@ -1,7 +1,6 @@
 // *用户 信息
 // 进口商
 const importer = {
-  initials: String,
   company: String,
   linkman: String,
   tel: Number,
@@ -13,7 +12,6 @@ const importer = {
 };
 // 出口商
 const exporter = {
-  initials: String,
   company: String,
   linkman: String,
   tel: Number,

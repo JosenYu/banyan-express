@@ -22,7 +22,7 @@ router.post("/createImporter", (req, res) => {
   });
 });
 // 查询进货联络人
-router.get("/getImporter", (req, res) => {
+router.get("/getImporter", (req, res) => { 
   db.custom_importer.find(
     {
       linkman: { $regex: req.query.linkman },
@@ -33,6 +33,29 @@ router.get("/getImporter", (req, res) => {
     }
   );
 });
+// 更新入库源信息
+router.post('/updateImporter', (req, res) => {
+  const letter = convertPinyin(req.body.linkman)
+    .toLocaleUpperCase()
+    .split("")[0];
+  db.custom_importer.updateOne({ _id: req.body._id },
+    {
+      company: req.body.company,
+      linkman: req.body.linkman,
+      tel: req.body.tel,
+      address: req.body.address,
+      letter: letter
+    },
+    (err, doc) => {
+      if (err) throw err;
+      res.json(doc)
+    })
+});
+
+/**
+ * 出口信息
+ */
+
 // 创建出口人
 router.post("/createExporter", (req, res) => {
   const letter = convertPinyin(req.body.linkman)
@@ -52,7 +75,7 @@ router.post("/createExporter", (req, res) => {
   });
 });
 
-// 查询出货联络人
+// 查询出货联络人- linkman
 router.get("/getExporter", (req, res) => {
   db.custom_exporter.find(
     {
@@ -93,7 +116,6 @@ router.get("/getAll", (req, res) => {
         resolve(doc);
       });
     });
-
   (async function () {
     const importer = await getImporter();
     const exporter = await getExporter();
@@ -102,4 +124,22 @@ router.get("/getAll", (req, res) => {
     res.json(result);
   });
 });
+// 更新出口源
+router.post('/updateExporter', (req, res) => {
+  const letter = convertPinyin(req.body.linkman)
+    .toLocaleUpperCase()
+    .split("")[0];
+  db.custom_exporter.updateOne({ _id: req.body._id },
+    {
+      company: req.body.company,
+      linkman: req.body.linkman,
+      tel: req.body.tel,
+      address: req.body.address,
+      letter: letter
+    },
+    (err, doc) => {
+      if (err) throw err;
+      res.json(doc)
+    })
+})
 module.exports = router;

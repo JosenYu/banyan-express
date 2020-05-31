@@ -14,51 +14,51 @@ router.get("/", function (req, res, next) {
 });
 // 根据条件查询
 router.get("/queryCondition", (req, res) => {
+  // 获取 stock 查询数据
+  const getStockData = (query) =>
+    new Promise((resolve) => {
+      db.stock.find(
+        {
+          name: { $regex: query.name },
+          model: { $regex: query.model },
+          brand: { $regex: query.brand },
+        },
+        ["name", "model", "brand", "surplusNumber", "unit"],
+        {
+          limit: 10,
+          skip: (query.currentPage - 1) * 10,
+        },
+        (err, doc) => {
+          if (err) throw err;
+          resolve(doc);
+        }
+      );
+    });
+  // 获取 stock 查询后的总数
+  const getStockCount = (query) =>
+    new Promise((resolve) => {
+      db.stock.countDocuments(
+        {
+          name: { $regex: query.name },
+          model: { $regex: query.model },
+          brand: { $regex: query.brand },
+        },
+        (err, count) => {
+          if (err) throw err;
+          resolve(count);
+        }
+      );
+    });
+  // 结合查询商品，和总数量 doc count
+  async function queryCondition(query) {
+    const doc = await getStockData(query);
+    const count = await getStockCount(query);
+    return { doc, count };
+  }
   queryCondition(req.query).then((v) => {
     res.json(v);
   });
 });
-// 结合查询商品，和总数量 doc count
-async function queryCondition(query) {
-  const doc = await getStockData(query);
-  const count = await getStockCount(query);
-  return { doc, count };
-}
-// 获取 stock 查询数据
-const getStockData = (query) =>
-  new Promise((resolve) => {
-    db.stock.find(
-      {
-        name: { $regex: query.name },
-        model: { $regex: query.model },
-        brand: { $regex: query.brand },
-      },
-      ["name", "model", "brand", "surplusNumber", "unit"],
-      {
-        limit: 10,
-        skip: (query.pageCurrent - 1) * 10,
-      },
-      (err, doc) => {
-        if (err) throw err;
-        resolve(doc);
-      }
-    );
-  });
-// 获取 stock 查询后的总数
-const getStockCount = (query) =>
-  new Promise((resolve) => {
-    db.stock.countDocuments(
-      {
-        name: { $regex: query.name },
-        model: { $regex: query.model },
-        brand: { $regex: query.brand },
-      },
-      (err, count) => {
-        if (err) throw err;
-        resolve(count);
-      }
-    );
-  });
 
 /**
  * 查询某一个商品详细信息
@@ -111,12 +111,34 @@ router.get("/searchOne", (req, res) => {
   });
 });
 
-// 创建商品型号规格
+/**
+ * 创建商品型号规格
+ * 先判断商品是否是否已经存在 精准查询
+ */
 router.post("/createModel", (req, res) => {
-  db.stock_model.create(req.body, (err, doc) => {
-    if (err) throw err;
-    res.json(doc);
-  });
+  db.stock_model.countDocuments(
+    {
+      name: req.body.name,
+      model: req.body.model,
+      brand: req.body.brand,
+    },
+    (err, count) => {
+      if (err) throw err;
+      if (count >= 1) {
+        res.json({
+          doc: count
+        })
+      } else {
+        db.stock_model.create(req.body, (err, doc) => {
+          if (err) throw err;
+          res.json(doc);
+        });
+      }
+    }
+  );
+
+
+
 });
 
 // 修改商品模型
@@ -135,49 +157,65 @@ router.post("/updateModel", (req, res) => {
   );
 });
 
-// 查询模型是否已经存在
+// 查询模型
 router.get("/getModel", (req, res) => {
-  (async function () {
-    const doc = await findModel(req.query);
-    const count = await modelCount(req.query);
-    return { doc, count };
-  })().then((result) => {
-    res.json(result);
-  });
-});
-const findModel = (query) =>
-  new Promise((resolve) => {
+  const findModel = (query) =>
+    new Promise((resolve) => {
+      db.stock_model.find(
+        {
+          name: { $regex: query.name },
+          model: { $regex: query.model },
+          brand: { $regex: query.brand },
+        },
+        null,
+        {
+          limit: 10,
+          skip: (query.currentPage - 1) * 10,
+        },
+        (err, doc) => {
+          if (err) throw err;
+          resolve(doc);
+        }
+      );
+    });
+  const modelCount = (query) =>
+    new Promise((resolve) => {
+      db.stock_model.countDocuments(
+        {
+          name: { $regex: query.name },
+          model: { $regex: query.model },
+          brand: { $regex: query.brand },
+        },
+        (err, count) => {
+          if (err) throw err;
+          resolve(count);
+        }
+      );
+    });
+  if (JSON.parse(req.query.getAll)) {
     db.stock_model.find(
       {
-        name: { $regex: query.name },
-        model: { $regex: query.model },
-        brand: { $regex: query.brand },
-      },
-      null,
-      {
-        limit: 10,
-        skip: (query.pageCurrent - 1) * 10,
+        name: { $regex: req.query.name },
+        model: { $regex: req.query.model },
+        brand: { $regex: req.query.brand },
       },
       (err, doc) => {
         if (err) throw err;
-        resolve(doc);
+        res.json(doc);
       }
     );
-  });
-const modelCount = (query) =>
-  new Promise((resolve) => {
-    db.stock_model.countDocuments(
-      {
-        name: { $regex: query.name },
-        model: { $regex: query.model },
-        brand: { $regex: query.brand },
-      },
-      (err, count) => {
-        if (err) throw err;
-        resolve(count);
-      }
-    );
-  });
+  } else {
+    (async function () {
+      const doc = await findModel(req.query);
+      const count = await modelCount(req.query);
+      return { doc, count };
+    })().then((result) => {
+      res.json(result);
+    });
+  }
+
+
+});
 
 // 采购商品
 router.post("/purchase", (req, res) => {
@@ -230,42 +268,18 @@ router.get("/getSell", (req, res) => {
  * 2. 更新 sell 的数量和价格
  */
 router.post("/updateSell", (req, res) => {
-  let updateStock = (body) =>
-    new Promise((resolve) => {
-      db.stock.updateOne(
-        { _id: body.stock_id },
-        {
-          surplusNumber: body.surplusNumber,
-        },
-        (err, raw) => {
-          if (err) throw err;
-          resolve(raw);
-        }
-      );
-    });
-  let updateStockSell = (body) =>
-    new Promise((resolve) => {
-      db.stock_sell.updateOne(
-        { _id: body._id },
-        {
-          sellNumber: body.sellNumber,
-          retail: body.retail,
-          totalRetail: body.totalRetail,
-        },
-        (err, raw) => {
-          if (err) throw err;
-          resolve(raw);
-        }
-      );
-    });
-  // 执行函数
-  (async function () {
-    let stock = await updateStock(req.body);
-    let stockSell = await updateStockSell(req.body);
-    return { stock, stockSell };
-  })().then((result) => {
-    res.json(result);
-  });
+  db.stock_sell.updateOne(
+    { _id: req.body._id },
+    {
+      sellNumber: req.body.sellNumber,
+      retail: req.body.retail,
+      totalRetail: req.body.totalRetail,
+    },
+    (err, doc) => {
+      if (err) throw err;
+      res.json(doc)
+    }
+  );
 });
 /**
  * 更新入库信息

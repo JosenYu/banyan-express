@@ -10,7 +10,7 @@ async 函数内部 return 返回的值。会成为 then 方法回调函数的参
 async function f() {
   return "hello world";
 }
-f().then(v => console.log(v)); // hello world
+f().then((v) => console.log(v)); // hello world
 ```
 
 如果 async 函数内部抛出异常，则会导致返回的 Promise 对象状态变为 reject 状态。抛出的错误而会被 catch 方法回调函数接收到。
@@ -20,8 +20,8 @@ async function e() {
   throw new Error("error");
 }
 e()
-  .then(v => console.log(v))
-  .catch(e => console.log(e));
+  .then((v) => console.log(v))
+  .catch((e) => console.log(e));
 ```
 
 正常情况下，await 命令后面跟着的是 Promise ，如果不是的话，也会被转换成一个 立即 resolve 的 Promise
@@ -30,13 +30,14 @@ e()
 async function f() {
   return await 1;
 }
-f().then(v => console.log(v)); // 1
+f().then((v) => console.log(v)); // 1
 ```
 
 async 函数返回的 Promise 对象，必须等到内部所有的 await 命令的 Promise 对象执行完，才会发生状态改变
 
 ```js
-const delay = timeout => new Promise(resolve => setTimeout(resolve, timeout));
+const delay = (timeout) =>
+  new Promise((resolve) => setTimeout(resolve, timeout));
 async function f() {
   await delay(1000);
   await delay(2000);
@@ -44,7 +45,7 @@ async function f() {
   return "done";
 }
 
-f().then(v => console.log(v)); // 等待6s后才输出 'done'
+f().then((v) => console.log(v)); // 等待6s后才输出 'done'
 ```
 
 ---
@@ -160,10 +161,10 @@ async function change() {
     fd.append("total", TOTAL);
     fetch("upload/aaa", {
       method: "post",
-      body: fd
+      body: fd,
     })
-      .then(response => console.log(response))
-      .catch(error => console.error("Error:", error));
+      .then((response) => console.log(response))
+      .catch((error) => console.error("Error:", error));
   });
   alert("切片完成，并提交后台。。");
 }
@@ -174,11 +175,11 @@ function upload() {
     method: "post",
     body: JSON.stringify(data), // data can be `string` or {object}!
     headers: {
-      "Content-Type": "application/json"
-    }
+      "Content-Type": "application/json",
+    },
   })
-    .then(response => console.log(response))
-    .catch(error => console.error("Error:", error));
+    .then((response) => console.log(response))
+    .catch((error) => console.error("Error:", error));
 }
 ```
 
@@ -196,7 +197,7 @@ router.post("/aaa", (req, res) => {
   var form = new formidable.IncomingForm();
   form.uploadDir = __dirname + "/../videos/";
   form.keepExtensions = true;
-  form.parse(req, function(err, fields, files) {
+  form.parse(req, function (err, fields, files) {
     if (err) return;
     // console.log("fields", fields);
     // console.log("files", files);
@@ -205,7 +206,7 @@ router.post("/aaa", (req, res) => {
       name: fields.name,
       cur: fields.cur,
       total: fields.total,
-      path: files.files.path
+      path: files.files.path,
     });
 
     /**
@@ -220,8 +221,8 @@ router.post("/aaa", (req, res) => {
 // 获取合并信息
 router.post("/aaa2", (req, res) => {
   // 需要合并的数组
-  const checkList = arr.filter(v => v.name === req.body.name);
-  arr = arr.filter(v => v.name !== req.body.name);
+  const checkList = arr.filter((v) => v.name === req.body.name);
+  arr = arr.filter((v) => v.name !== req.body.name);
   const [item] = checkList;
   // 文件名称
   const NAME = item.name;
@@ -241,7 +242,7 @@ async function merage(checkList, writeStream) {
 }
 // 写入流
 const pipeStream = (iterator, writeStream) =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     const readStream = fs.createReadStream(iterator.path);
     readStream.pipe(writeStream, { end: false });
     // 读取结束 删除文件
@@ -253,3 +254,57 @@ const pipeStream = (iterator, writeStream) =>
     });
   });
 ```
+
+## 启动并支持 http/https 方法
+
+简述：开启 3001-http，3002-https，2 个端口的服务，创建 3000-net 服务将传过来的 tcp/ip ，服务分发给 http/https，分发判断逻辑是传过来的是什么协议就分发给那个协议的服务上
+
+1. 获取.key.pem nginx 证书（略阿里云上申请/下载）
+
+2. 将证书放在项目中并引入
+
+   ```js
+   var https = require("https");
+   var fs = require("fs");
+   // *同步读取密钥和签名证书
+   var options = {
+     key: fs.readFileSync(__dirname + "/key.key"),
+     cert: fs.readFileSync(__dirname + "/pem.pem"),
+   };
+   ```
+
+3. 创建 https 服务
+
+   ```js
+   var httpsServer = https.createServer(options, app);
+   httpsServer.listen(3002);
+   ```
+
+4. 开启 net 服务
+
+   [net 服务介绍](http://nodejs.cn/api/net.html#net_net_createserver_options_connectionlistener)
+
+   ```js
+   // 2、创建服务器进行代理
+   net
+     .createServer(function (socket) {
+       socket.once("data", function (buf) {
+         // console.log(buf[0]);
+         // https 数据流的第一位是十六进制“16”，转换成十进制就是 22
+         var address = buf[0] === 22 ? httpsPort : httpPort;
+         //创建一个指向 https 或 http 服务器的链接
+         var proxy = net.createConnection(address, function () {
+           proxy.write(buf);
+           //反向代理的过程，tcp 接受的数据交给代理链接，代理链接服务器端返回数据交由 socket 返回给客户端
+           socket.pipe(proxy).pipe(socket);
+         });
+         proxy.on("error", function (err) {
+           console.log(err);
+         });
+       });
+       socket.on("error", function (err) {
+         console.log(err);
+       });
+     }, app)
+     .listen(3003); // 执行函数 此处是真正能够访问的端口，网站默认是 80 端口。
+   ```

@@ -53,10 +53,10 @@ router.get("/getCommodity", (req, res, next) => {
   const model = req.query.model || "";
   const brand = req.query.brand || "";
   const pageSize = Number(req.query.pageSize || 10);
-  const pageCurrent = Number(req.query.pageCurrent - 1 || 0);
+  const currentPage = Number(req.query.currentPage - 1 || 0);
   console.info("find.query", req.query);
   // 模糊查询商品
-  const doc = (name, brand, model, pageSize, pageCurrent) =>
+  const doc = (name, brand, model, pageSize, currentPage) =>
     new Promise((resolve) => {
       db.commodity.find(
         {
@@ -66,7 +66,7 @@ router.get("/getCommodity", (req, res, next) => {
           // number: { $gt: 0 }
         },
         null,
-        { limit: pageSize, skip: pageCurrent * pageSize },
+        { limit: pageSize, skip: currentPage * pageSize },
         (err, doc) => {
           if (err) {
             res.status(500);
@@ -101,7 +101,7 @@ router.get("/getCommodity", (req, res, next) => {
     });
   (async () => {
     let documents, totalCounts;
-    documents = await doc(name, brand, model, pageSize, pageCurrent);
+    documents = await doc(name, brand, model, pageSize, currentPage);
     totalCounts = await count(name, brand, model);
     return { documents, totalCounts };
   })().then((result) => {
@@ -115,9 +115,9 @@ router.get("/getCommodity/surplus", (req, res, next) => {
   const model = req.query.model || "";
   const brand = req.query.brand || "";
   const pageSize = Number(req.query.pageSize || 10);
-  const pageCurrent = Number(req.query.pageCurrent - 1 || 0);
+  const currentPage = Number(req.query.currentPage - 1 || 0);
   // 模糊查询，数量大于0
-  const document = (name, model, brand, pageSize, pageCurrent) =>
+  const document = (name, model, brand, pageSize, currentPage) =>
     new Promise((resolve, reject) => {
       db.commodity.find(
         {
@@ -127,7 +127,7 @@ router.get("/getCommodity/surplus", (req, res, next) => {
           number: { $gt: 0 },
         },
         null,
-        { limit: pageSize, skip: pageCurrent * pageSize },
+        { limit: pageSize, skip: currentPage * pageSize },
         (err, doc) => {
           if (err) {
             reject(err);
@@ -161,8 +161,8 @@ router.get("/getCommodity/surplus", (req, res, next) => {
       );
     });
   (async () => {
-    doc = await document(name, model, brand, pageSize, pageCurrent);
-    totalCounts = await count(name, model, brand, pageSize, pageCurrent);
+    doc = await document(name, model, brand, pageSize, currentPage);
+    totalCounts = await count(name, model, brand, pageSize, currentPage);
     return { doc, totalCounts };
   })().then((result) => {
     console.log("find.content：", result);
