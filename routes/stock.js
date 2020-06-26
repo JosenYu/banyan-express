@@ -17,22 +17,41 @@ router.get("/queryCondition", (req, res) => {
   // 获取 stock 查询数据
   const getStockData = (query) =>
     new Promise((resolve) => {
-      db.stock.find(
-        {
-          name: { $regex: query.name },
-          model: { $regex: query.model },
-          brand: { $regex: query.brand },
-        },
-        ["name", "model", "brand", "surplusNumber", "unit"],
-        {
-          limit: 10,
-          skip: (query.currentPage - 1) * 10,
-        },
-        (err, doc) => {
-          if (err) throw err;
-          resolve(doc);
-        }
-      );
+      if (query.getAll && JSON.parse(query.getAll)) {
+        db.stock.find(
+          {
+            name: { $regex: query.name },
+            model: { $regex: query.model },
+            brand: { $regex: query.brand },
+          },
+          ["name", "model", "brand", "surplusNumber", "unit"],
+          // {
+          //   limit: 10,
+          //   skip: (query.currentPage - 1) * 10,
+          // },
+          (err, doc) => {
+            if (err) throw err;
+            resolve(doc);
+          }
+        );
+      } else {
+        db.stock.find(
+          {
+            name: { $regex: query.name },
+            model: { $regex: query.model },
+            brand: { $regex: query.brand },
+          },
+          ["name", "model", "brand", "surplusNumber", "unit"],
+          {
+            limit: 10,
+            skip: (query.currentPage - 1) * 10,
+          },
+          (err, doc) => {
+            if (err) throw err;
+            resolve(doc);
+          }
+        );
+      }
     });
   // 获取 stock 查询后的总数
   const getStockCount = (query) =>
@@ -50,12 +69,11 @@ router.get("/queryCondition", (req, res) => {
       );
     });
   // 结合查询商品，和总数量 doc count
-  async function queryCondition(query) {
-    const doc = await getStockData(query);
-    const count = await getStockCount(query);
+  (async function () {
+    const doc = await getStockData(req.query);
+    const count = await getStockCount(req.query);
     return { doc, count };
-  }
-  queryCondition(req.query).then((v) => {
+  })().then((v) => {
     res.json(v);
   });
 });
@@ -136,9 +154,6 @@ router.post("/createModel", (req, res) => {
       }
     }
   );
-
-
-
 });
 
 // 修改商品模型
@@ -192,7 +207,7 @@ router.get("/getModel", (req, res) => {
         }
       );
     });
-  if (JSON.parse(req.query.getAll)) {
+  if (req.query.getAll && JSON.parse(req.query.getAll)) {
     db.stock_model.find(
       {
         name: { $regex: req.query.name },
